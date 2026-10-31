@@ -1,0 +1,27 @@
+# --- Secrets : jamais versionnés -----------------------------------------
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# --- Données locales et session Telegram --------------------------------
+# `data/telegram.session` donne un accès complet au compte Telegram : il ne
+# sort jamais de cette machine. Les autres fichiers sont le carnet de trades
+# réel (positions, journal, statistiques).
+data/
+
+# --- Python --------------------------------------------------------------
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# --- Outils / OS ---------------------------------------------------------
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.log
