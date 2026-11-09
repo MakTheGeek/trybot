@@ -205,6 +205,20 @@ with TempStore() as store, EnvGuard():
     check("sans variable d'environnement, config.get_env lit le fichier",
           config.get_env("GMGN_API_KEY") == "gmgn_file_layer_0123456789")
 
+    # Un fichier .env enregistré par Notepad ou PowerShell 5.1 commence par un
+    # BOM : sans le retirer, la première clé du fichier devient « \ufeffGMGN_API_KEY »,
+    # donc absente. Constaté en vrai sur ~/.config/gmgn/.env (clé API déclarée
+    # absente alors que le fichier la contenait).
+    with tempfile.TemporaryDirectory() as tmp:
+        bom_file = pathlib.Path(tmp) / ".env"
+        bom_file.write_bytes(b"\xef\xbb\xbfGMGN_API_KEY=gmgn_bom_0123456789\n"
+                             b"AUTRE_CLE=seconde\n")
+        parsed = config._read_env_file(bom_file)
+        check("un .env avec BOM ne perd pas sa première clé",
+              parsed.get("GMGN_API_KEY") == "gmgn_bom_0123456789", str(parsed)[:80])
+        check("et lit quand même les clés suivantes",
+              parsed.get("AUTRE_CLE") == "seconde")
+
     check("une clé absente est annoncée absente",
           secrets.entry("HELIUS_API_KEY")["set"] is False)
     layer, value = secrets._value_in_force("SOLANA_WALLET_PRIVATE_KEY")

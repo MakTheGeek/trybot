@@ -287,7 +287,7 @@ confirm.last = None
 
 
 def setup_engine() -> None:
-    engine.wallet = "GfAopc" + "1" * 39
+    engine.wallet = "TestWa11et" + "1" * 33
     engine.sol_balance = 1.0
     engine._closing.clear()
     # La ligne « Sortie recalculée » n'est écrite qu'une fois par minute et par
@@ -537,7 +537,7 @@ async def section5() -> None:
         config._settings["execution_backend"] = "jupiter"
         config._settings["slippage"] = 30
         engine.sol_balance = 1.0
-        engine.wallet = "GfAopc" + "1" * 39
+        engine.wallet = "TestWa11et" + "1" * 33
 
         section("achat papier : le montant engagé est celui du réglage")
         config._settings["paper_trading"] = True

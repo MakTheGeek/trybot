@@ -23,12 +23,17 @@ def _read_env_file(path) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.exists():
         return values
-    for raw_line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    # A BOM is invisible in an editor but becomes part of the first key name:
+    # a file saved by Notepad or PowerShell 5.1 would otherwise lose its very
+    # first secret (`\ufeffGMGN_API_KEY` is not `GMGN_API_KEY`).
+    text = text.lstrip("\ufeff")
+    for raw_line in text.splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, _, value = line.partition("=")
-        key = key.strip()
+        key = key.strip().lstrip("\ufeff")
         value = value.strip()
         if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
             value = value[1:-1]

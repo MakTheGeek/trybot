@@ -856,6 +856,9 @@ tools/
                         écrit)
   priority_fee.py       Frais de priorité que Jupiter a réellement demandés, lus sur
                         la chaîne (le plafond écrase-t-il le prix du marché ?)
+  verify_clock.py       Correction d'horloge : décalage appliqué à l'horodatage,
+                        et ce que `gmgn-cli` lit vraiment dans son propre `.env`
+                        (une valeur périmée y prime) — 24 vérifications
 frontend/
   index.html / styles.css / app.js   Dashboard
 data/                   settings.json, positions.json, calls.json, logs.json, session
@@ -867,6 +870,13 @@ data/                   settings.json, positions.json, calls.json, logs.json, se
    l'horloge de la machine dérive, toutes les requêtes échouent
    (`AUTH_TIMESTAMP_EXPIRED`). Le bot mesure la dérive au démarrage et corrige
    automatiquement chaque appel. La dérive est visible dans *About*.
+   Piège vérifié le 9 novembre 2026 : `gmgn-cli` charge `~/.config/gmgn/.env`
+   avec `override: true`, donc un `GMGN_TIME_OFFSET_MS` **périmé** écrit dans ce
+   fichier prime sur la valeur du bot. Mesure du jour : fichier à `-93900 ms`
+   pour une dérive réelle de `-117000 ms` — 23 s d'écart, et **tous** les appels
+   GMGN refusés avec un message qui accuse la clé API. Le bot réécrit donc cette
+   ligne quand elle ne correspond plus à sa mesure (`tools/verify_clock.py`,
+   24 vérifications).
 2. **Anti-rate-limit** — GMGN bannit les IP en cas d'abus. Toutes les requêtes
    passent par une **file unique série** avec espacement minimum, mise en cache
    et **cooldown automatique** en cas de ban. Les analyses sont limitées en
@@ -1019,7 +1029,7 @@ de prix plus frais **sans** augmenter le débit d'appels.
 
 ## État vérifié en conditions réelles
 
-- Telegram connecté (`@hamedmak1`), **3/3 canaux résolus**, écoute continue.
+- Telegram connecté (`@votre_compte`), **3/3 canaux résolus**, écoute continue.
 - Calls réels analysés par GMGN (token info + sécurité) et Dexscreener.
 - Moteur de critères validé sur des tokens réels : certains passent `9/9`
   (`Snipped`), les autres sont rejetés avec la raison exacte.
@@ -1113,7 +1123,7 @@ de prix plus frais **sans** augmenter le débit d'appels.
 | Problème | Solution |
 |---|---|
 | `gmgn-cli introuvable` | `npm install -g gmgn-cli` |
-| `AUTH_TIMESTAMP_EXPIRED` | Horloge système décalée — corrigez l'heure Windows (le bot compense déjà la dérive résiduelle) |
+| `AUTH_TIMESTAMP_EXPIRED` | Horloge système décalée. Corrigez l'heure Windows si possible ; sinon le bot compense seul la dérive **et** réaligne `GMGN_TIME_OFFSET_MS` dans `~/.config/gmgn/.env`, dont une valeur périmée prime sur la sienne (journalisé au démarrage, voir `tools/verify_clock.py`) |
 | `RATE_LIMIT_BANNED` | Attendez la fin du ban (affichée) ; le bot réduit automatiquement son débit |
 | Aucun call détecté | Vérifiez **Settings → Telegram** (statut « connecté » et canaux résolus) |
 | Achat non exécuté | Vérifiez le solde SOL du wallet (il doit couvrir le montant **+ ~0,003 SOL** de frais/loyer). En moteur `gmgn`, vérifiez aussi que `GMGN_PRIVATE_KEY` est présente |

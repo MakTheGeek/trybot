@@ -619,7 +619,7 @@ class _SignatureSocket:
             try:
                 async with websockets.connect(
                     url, open_timeout=15, ping_interval=20, close_timeout=5,
-                    max_size=2 ** 21,
+                    max_size=2 ** 21, ssl=net.ssl_context(),
                 ) as socket:
                     self._socket = socket
                     self._connected = True

@@ -57,6 +57,8 @@ class Bot:
         )
 
         # 2) GMGN + wallet + SOL price
+        if clock.note:
+            store.log(clock.note, level="warn", action="system")
         store.runtime["gmgn"] = "ok" if gmgn.available else "missing"
         if gmgn.available:
             await trader.refresh_wallet()
