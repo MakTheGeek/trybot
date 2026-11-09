@@ -513,8 +513,12 @@ donc `data/settings.json` n'est pas touché (vérifié octet pour octet).
 
 ## Installation
 
+Dépôt public : <https://github.com/MakTheGeek/trybot>.
+
 ```powershell
-cd C:\Users\pc\Downloads\TryBot
+# 0) Récupérer le code (le dossier de destination est libre)
+git clone https://github.com/MakTheGeek/trybot.git TryBot
+cd TryBot
 
 # 1) Dépendances Python
 python -m venv venv
@@ -522,7 +526,16 @@ python -m venv venv
 
 # 2) CLI GMGN (fournit les données on-chain)
 npm install -g gmgn-cli
+
+# 3) Vos identifiants Telegram, jamais dans le code
+Copy-Item .env.example .env
+notepad .env
 ```
+
+`.env` est ignoré par git : c'est là que vivent `TELEGRAM_API_ID`,
+`TELEGRAM_API_HASH` et `TELEGRAM_PHONE` (voir *Configuration Telegram* plus bas).
+Aucun identifiant n'est écrit en dur dans le code, et `data/` (session Telegram,
+carnet de trades, journal) n'est jamais publié non plus.
 
 ### Configuration GMGN — `~/.config/gmgn/.env`
 
